@@ -114,30 +114,33 @@ def train(dataset, vocabsize, flags):
                 valid_xs,
                 1.0
             )
+            
+            if flags.model == "gsdtm":
 
-            valid_retrieval_task_prec = evaluate.retrieval_evaluate(
-                train_vectors,
-                valid_vectors,
-                train_ys,
-                valid_ys
-            )[0]
+                valid_retrieval_task_prec = evaluate.retrieval_evaluate(
+                    train_vectors,
+                    valid_vectors,
+                    train_ys,
+                    valid_ys
+                )[0]
 
-            s_prec_frac = tf.Summary(
-                            value=[tf.Summary.Value(
-                                   tag="precision/valid_precision_by_fraction",
-                                   simple_value=valid_retrieval_task_prec)])
-            valid_writer.add_summary(s_prec_frac, epoch + 1)
 
-            if valid_retrieval_task_prec > best_prec_value:
-                best_prec_value = valid_retrieval_task_prec
-                print("Best precision@0.02 validation found: {0}".format(
-                        valid_retrieval_task_prec))
-                sys.stdout.flush()
+                s_prec_frac = tf.Summary(
+                                value=[tf.Summary.Value(
+                                       tag="precision/valid_precision_by_fraction",
+                                       simple_value=valid_retrieval_task_prec)])
+                valid_writer.add_summary(s_prec_frac, epoch + 1)
 
-                saver.save(model.sess,
-                           os.path.join(flags.summaries_dir,
-                                        'model_by_prec_frac.ckpt'),
-                           global_step=epoch + 1)
+                if valid_retrieval_task_prec > best_prec_value:
+                    best_prec_value = valid_retrieval_task_prec
+                    print("Best precision@0.02 validation found: {0}".format(
+                            valid_retrieval_task_prec))
+                    sys.stdout.flush()
+
+                    saver.save(model.sess,
+                               os.path.join(flags.summaries_dir,
+                                            'model_by_prec_frac.ckpt'),
+                               global_step=epoch + 1)
 
             # Calculate the perplexity on valid dataset
             valid_perplexity_value = evaluate.get_perplexity(model, valid_xs)

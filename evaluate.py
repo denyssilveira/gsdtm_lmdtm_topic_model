@@ -21,6 +21,7 @@ def get_recall_precision_perplexity(model, dataset, flags, vocabsize):
 
     recall_points = None
     precision_by_recall = None
+    recall_points = [0.0002, 0.001, 0.004, 0.016, 0.064, 0.256, 1.0]
 
     train_batch = dataset.create_minibatch(dataset.train_data,
                                            dataset.train_labels,
@@ -56,26 +57,26 @@ def get_recall_precision_perplexity(model, dataset, flags, vocabsize):
 
     test_perplexity = ev.get_perplexity(model, test_xs)
     print('Perplexity: {:.6f}'.format(test_perplexity))
+    
+    if flags.model == 'gsdtm':
+        for c in range(len(train_vectors)):
+            train_vectors[c] = np.concatenate((train_vectors[c], valid_vectors[c]))
+        train_ys = np.concatenate((train_ys, valid_ys))
 
-    for c in range(len(train_vectors)):
-        train_vectors[c] = np.concatenate((train_vectors[c], valid_vectors[c]))
-    train_ys = np.concatenate((train_ys, valid_ys))
+        print('Get precision-recall data. Please, wait...')
 
-    print('Get precision-recall data. Please, wait...')
-    recall_points = [0.0002, 0.001, 0.004, 0.016, 0.064, 0.256, 1.0]
+        precision_by_recall = ev.retrieval_evaluate(
+            train_vectors,
+            test_vectors,
+            train_ys,
+            test_ys,
+            recall_points
+        )
 
-    precision_by_recall = ev.retrieval_evaluate(
-        train_vectors,
-        test_vectors,
-        train_ys,
-        test_ys,
-        recall_points
-    )
+        print("Recall x Precision: ")
 
-    print("Recall x Precision: ")
-
-    for r, p in zip(recall_points, precision_by_recall):
-        print(r, p)
+        for r, p in zip(recall_points, precision_by_recall):
+            print(r, p)
 
     return (recall_points, precision_by_recall, test_perplexity)
 
