@@ -2,7 +2,7 @@
 GSDTM and LMDTM VAEs Implementation
 This module computes the precison by fraction of documents, perplexity and rank of topics.
 
-Code adapted from https://github.com/AYLIEN/docnade
+Code partially adapted from https://github.com/AYLIEN/docnade (Author: John Glover - AYLIEN) 
 """
 
 import numpy as np

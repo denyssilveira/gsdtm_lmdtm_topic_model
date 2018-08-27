@@ -1,6 +1,8 @@
 """
 GSDTM and LMDTM VAEs Implementation
 This code provides an implementation of the LMDTM VAE Model.
+
+Code partially adapted from https://github.com/RuiShu/vae-clustering (Author: Rui Shu)
 """
 
 import tensorflow as tf
@@ -153,7 +155,7 @@ class LMDTM(object):
                     utils.variable_summaries(self.log_p_x[i], 'decoder/log_px{:d}'.format(i))
 
             # Multinomial KL
-            self.KLD_discrete = tf.add_n([qy[:, i] * tf.log(flags.n_component * qy[:, i] + 1e-12) 
+            self.KLD_discrete = tf.add_n([qy[:, i] * tf.log(flags.n_component * qy[:, i] + 1e-12)
                     for i in range(flags.n_component)]) / flags.n_component
 
             # Gaussian KL
@@ -162,12 +164,12 @@ class LMDTM(object):
                         0.5 * tf.reduce_sum((2 * (self.log_prior_sigma[i] - self.log_sigma[i])) +\
                         tf.div(tf.square(self.sigma[i]) + tf.square(self.mean[i] - self.prior_mean[i]), \
                         # exp(2 * log(sigma)) == sigma^2
-                        tf.exp(2 * self.log_prior_sigma[i])) - 1, 1)      
+                        tf.exp(2 * self.log_prior_sigma[i])) - 1, 1)
 
                         for i in range(flags.n_component)
                     ]) / flags.n_component
 
-            self.reconstruction_loss = tf.add_n([tf.reduce_sum(tf.multiply(self.log_p_x[i], self.x), 1) 
+            self.reconstruction_loss = tf.add_n([tf.reduce_sum(tf.multiply(self.log_p_x[i], self.x), 1)
                 for i in range(flags.n_component)]) / flags.n_component
 
             self.elbo = self.reconstruction_loss - self.KLD_gaussian - self.KLD_discrete
